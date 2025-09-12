@@ -1,15 +1,10 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+// src/pages/Register.jsx
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
 const Register = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'customer' // default role
-  });
+  const [form, setForm] = useState({ email: "", password: "", role: "customer" });
 
   const handleChange = (e) => {
     setForm({
@@ -18,16 +13,13 @@ const Register = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      await axios.post('http://localhost:5000/api/register', form);
-      alert('Registered successfully!');
-      navigate('/'); // Redirect to login page
-    } catch (error) {
-      console.error(error);
-      alert('Registration failed. Please try again.');
-    }
+
+    // save user in localStorage
+    localStorage.setItem("user", JSON.stringify(form));
+    alert("Registered successfully!");
+    navigate("/"); // redirect to login
   };
 
   return (
@@ -37,22 +29,13 @@ const Register = () => {
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <input
-            type="text"
-            name="name"
-            placeholder="Name"
-            value={form.name}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring"
-          />
-          <input
             type="email"
             name="email"
             placeholder="Email"
             value={form.email}
             onChange={handleChange}
+            className="w-full px-4 py-2 border rounded"
             required
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring"
           />
           <input
             type="password"
@@ -60,12 +43,9 @@ const Register = () => {
             placeholder="Password"
             value={form.password}
             onChange={handleChange}
+            className="w-full px-4 py-2 border rounded"
             required
-            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring"
           />
-
-          {/* Optional: Dropdown for role if needed */}
-          
           <select
             name="role"
             value={form.role}
@@ -74,8 +54,7 @@ const Register = () => {
           >
             <option value="customer">Customer</option>
             <option value="admin">Admin</option>
-          </select> 
-          
+          </select>
 
           <button
             type="submit"
@@ -86,7 +65,7 @@ const Register = () => {
         </form>
 
         <p className="mt-4 text-center text-sm">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <Link to="/" className="text-blue-600 hover:underline">
             Login
           </Link>
@@ -97,3 +76,4 @@ const Register = () => {
 };
 
 export default Register;
+
