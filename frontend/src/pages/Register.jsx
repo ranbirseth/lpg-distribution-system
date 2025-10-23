@@ -1,26 +1,52 @@
-import { useState } from "react";
+// src/pages/Register.jsx
+import { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock, User } from "lucide-react";
+import API from "../services/api";
+import { AuthContext } from "../context/AuthContext";
 
-const Register = () => {
+export default function Register() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "", role: "customer" });
+  const { login } = useContext(AuthContext);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleSubmit = (e) => {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "customer",
+  });
+
+  const [error, setError] = useState("");
+
+  // ✅ handleChange for all inputs
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem("user", JSON.stringify(form));
-    alert("Registered successfully!");
-    navigate("/");
+    setError("");
+
+    try {
+      const { data } = await API.post("/auth/register", form);
+
+      login(data); // save user + token
+
+      // Determine role correctly
+      const userRole = data.role || data.user?.role;
+
+      if (userRole === "admin") navigate("/admin");
+      else navigate("/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed. Try again.");
+    }
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-950 overflow-hidden">
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/60" />
 
-      {/* Main Container */}
       <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-6xl mx-auto p-6">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -33,6 +59,21 @@ const Register = () => {
           </h2>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+            {error && <p className="text-red-500 text-center">{error}</p>}
+
+            <div className="relative">
+              <User className="absolute left-3 top-3 text-orange-400" />
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                value={form.name}
+                onChange={handleChange}
+                className="w-full pl-10 pr-3 py-3 rounded-lg bg-black/40 text-white placeholder-gray-400 border border-gray-600 focus:border-orange-400 focus:ring-2 focus:ring-orange-500 outline-none transition"
+                required
+              />
+            </div>
+
             <div className="relative">
               <Mail className="absolute left-3 top-3 text-orange-400" />
               <input
@@ -45,6 +86,7 @@ const Register = () => {
                 required
               />
             </div>
+
             <div className="relative">
               <Lock className="absolute left-3 top-3 text-orange-400" />
               <input
@@ -57,6 +99,7 @@ const Register = () => {
                 required
               />
             </div>
+
             <div className="relative">
               <User className="absolute left-3 top-3 text-orange-400" />
               <select
@@ -65,10 +108,15 @@ const Register = () => {
                 onChange={handleChange}
                 className="w-full pl-10 pr-3 py-3 rounded-lg bg-black/40 text-white border border-gray-600 focus:border-orange-400 focus:ring-2 focus:ring-orange-500 outline-none transition"
               >
-                <option value="customer" className="text-black">Customer</option>
-                <option value="admin" className="text-black">Admin</option>
+                <option value="customer" className="text-black">
+                  Customer
+                </option>
+                <option value="admin" className="text-black">
+                  Admin
+                </option>
               </select>
             </div>
+
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0px 0px 20px #f97316" }}
               whileTap={{ scale: 0.95 }}
@@ -90,6 +138,4 @@ const Register = () => {
       </div>
     </div>
   );
-};
-
-export default Register;
+}
