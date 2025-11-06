@@ -1,6 +1,15 @@
 import { useEffect, useState, useContext } from "react";
 import { motion } from "framer-motion";
-import { Trash2, Shield, User, LogOut, LayoutDashboard, Package, Users } from "lucide-react";
+import {
+  Trash2,
+  Shield,
+  LogOut,
+  LayoutDashboard,
+  Package,
+  Users,
+  Menu,
+  X,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import API from "../services/api";
 import { AuthContext } from "../context/AuthContext";
@@ -10,8 +19,8 @@ export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Fetch all users
   const fetchUsers = async () => {
     try {
       const { data } = await API.get("/auth/all");
@@ -27,7 +36,6 @@ export default function AdminUsers() {
     fetchUsers();
   }, []);
 
-  // Delete user
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
@@ -40,7 +48,6 @@ export default function AdminUsers() {
     }
   };
 
-  // Toggle role between customer/admin
   const toggleRole = async (id, currentRole) => {
     const newRole = currentRole === "admin" ? "customer" : "admin";
     try {
@@ -56,27 +63,47 @@ export default function AdminUsers() {
   const handleLogout = () => logout();
 
   return (
-    <div className="relative min-h-screen flex bg-gradient-to-br from-gray-900 via-black to-gray-950 text-white overflow-hidden">
+    <div className="relative min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-gray-900 via-black to-gray-950 text-white overflow-hidden">
       <div className="absolute inset-0 bg-black/70" />
 
+      {/* Mobile Navbar */}
+      <header className="md:hidden relative z-20 flex items-center justify-between p-4 bg-black/50 backdrop-blur-xl border-b border-white/20">
+        <h1 className="text-xl font-bold text-orange-400">🔥 Admin Panel</h1>
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="text-orange-400 focus:outline-none"
+        >
+          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </header>
+
       {/* Sidebar */}
-      <aside className="relative z-10 w-64 bg-white/10 backdrop-blur-xl border-r border-white/20 p-6">
-        <h1 className="text-2xl font-bold text-orange-400 mb-6">🔥 Admin Panel</h1>
+      <aside
+        className={`fixed md:static top-0 left-0 h-full md:h-auto w-64 bg-white/10 backdrop-blur-xl border-r border-white/20 p-6 transform transition-transform duration-300 z-30 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+      >
+        <h1 className="hidden md:block text-2xl font-bold text-orange-400 mb-6">
+          🔥 Admin Panel
+        </h1>
         <nav className="space-y-3">
           <Link
             to="/admin"
+            onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-orange-500/20 transition"
           >
             <LayoutDashboard className="text-orange-400" size={18} /> Dashboard
           </Link>
           <Link
             to="/admin/orders"
+            onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-2 py-2 px-4 rounded-lg hover:bg-orange-500/20 transition"
           >
             <Package className="text-orange-400" size={18} /> Manage Orders
           </Link>
           <Link
             to="/admin/users"
+            onClick={() => setSidebarOpen(false)}
             className="flex items-center gap-2 py-2 px-4 rounded-lg bg-orange-500/20 transition"
           >
             <Users className="text-orange-400" size={18} /> Manage Users
@@ -91,12 +118,12 @@ export default function AdminUsers() {
       </aside>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 p-8">
+      <main className="relative z-10 flex-1 p-4 md:p-8 overflow-x-hidden">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-3xl font-bold text-orange-400 mb-8"
+          className="text-2xl md:text-3xl font-bold text-orange-400 mb-6 text-center md:text-left"
         >
           Manage Users
         </motion.h2>
@@ -108,9 +135,9 @@ export default function AdminUsers() {
         )}
 
         {loading ? (
-          <p className="text-gray-400">Loading users...</p>
+          <p className="text-gray-400 text-center">Loading users...</p>
         ) : users.length === 0 ? (
-          <p className="text-gray-400">No users found.</p>
+          <p className="text-gray-400 text-center">No users found.</p>
         ) : (
           <div className="overflow-x-auto bg-white/10 border border-white/20 rounded-2xl shadow-lg">
             <table className="min-w-full text-sm text-left text-gray-300">
@@ -130,8 +157,8 @@ export default function AdminUsers() {
                     key={u._id}
                     className="border-b border-gray-700 hover:bg-white/5 transition"
                   >
-                    <td className="py-3 px-4">{u.name}</td>
-                    <td className="py-3 px-4">{u.email}</td>
+                    <td className="py-3 px-4 break-words">{u.name}</td>
+                    <td className="py-3 px-4 break-words">{u.email}</td>
                     <td className="py-3 px-4">
                       <span
                         className={`px-2 py-1 rounded text-xs font-semibold ${
@@ -144,7 +171,9 @@ export default function AdminUsers() {
                       </span>
                     </td>
                     <td className="py-3 px-4">{u.phone || "—"}</td>
-                    <td className="py-3 px-4">{u.address || "—"}</td>
+                    <td className="py-3 px-4 max-w-[200px] truncate">
+                      {u.address || "—"}
+                    </td>
                     <td className="py-3 px-4 text-center flex gap-3 justify-center">
                       <button
                         onClick={() => toggleRole(u._id, u.role)}

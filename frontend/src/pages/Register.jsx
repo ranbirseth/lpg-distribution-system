@@ -15,7 +15,7 @@ export default function Register() {
     email: "",
     password: "",
     role: "customer",
-    adminCode: "", // 🧠 for secret code
+    adminCode: "",
   });
 
   const [error, setError] = useState("");
@@ -28,17 +28,14 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
-    // 🧩 Prevent empty adminCode if role = admin
     if (form.role === "admin" && !form.adminCode) {
       return setError("Admin secret code is required.");
     }
 
     try {
       const { data } = await API.post("/auth/register", form);
-
       login(data);
       const userRole = data.role || data.user?.role;
-
       if (userRole === "admin") navigate("/admin");
       else navigate("/dashboard");
     } catch (err) {
@@ -47,25 +44,40 @@ export default function Register() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-950 overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-950 overflow-hidden px-4 sm:px-6 lg:px-8">
+      {/* overlay */}
       <div className="absolute inset-0 bg-black/60" />
 
-      <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-6xl mx-auto p-6">
+      {/* container */}
+      <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-10 w-full max-w-6xl mx-auto py-8">
+        {/* optional illustration section (hidden on small screens) */}
+        <div className="hidden md:flex flex-col items-start text-left text-white w-1/2 space-y-4">
+          <h1 className="text-3xl lg:text-5xl font-bold text-orange-400">
+            Welcome to Our Platform
+          </h1>
+          <p className="text-gray-300 text-base lg:text-lg leading-relaxed">
+            Join us and get access to your dashboard instantly. Manage your account,
+            explore features, and grow your experience with ease.
+          </p>
+        </div>
+
+        {/* form */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-          className="flex-1 bg-white/10 backdrop-blur-xl border border-white/20 p-8 rounded-2xl shadow-2xl w-full max-w-md"
+          className="flex-1 bg-white/10 backdrop-blur-xl border border-white/20 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md"
         >
-          <h2 className="text-4xl font-bold text-center text-orange-400 mb-6 tracking-wide">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center text-orange-400 mb-6 tracking-wide">
             Create Account
           </h2>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             {error && <p className="text-red-500 text-center">{error}</p>}
 
+            {/* name */}
             <div className="relative">
-              <User className="absolute left-3 top-3 text-orange-400" />
+              <User className="absolute left-3 top-3 text-orange-400" size={20} />
               <input
                 type="text"
                 name="name"
@@ -77,8 +89,9 @@ export default function Register() {
               />
             </div>
 
+            {/* email */}
             <div className="relative">
-              <Mail className="absolute left-3 top-3 text-orange-400" />
+              <Mail className="absolute left-3 top-3 text-orange-400" size={20} />
               <input
                 type="email"
                 name="email"
@@ -90,8 +103,9 @@ export default function Register() {
               />
             </div>
 
+            {/* password */}
             <div className="relative">
-              <Lock className="absolute left-3 top-3 text-orange-400" />
+              <Lock className="absolute left-3 top-3 text-orange-400" size={20} />
               <input
                 type="password"
                 name="password"
@@ -103,9 +117,9 @@ export default function Register() {
               />
             </div>
 
-            {/* 🧠 Role dropdown */}
+            {/* role */}
             <div className="relative">
-              <User className="absolute left-3 top-3 text-orange-400" />
+              <User className="absolute left-3 top-3 text-orange-400" size={20} />
               <select
                 name="role"
                 value={form.role}
@@ -121,10 +135,10 @@ export default function Register() {
               </select>
             </div>
 
-            {/* 🧩 Show secret code field only when role=admin */}
+            {/* admin code */}
             {form.role === "admin" && (
               <div className="relative">
-                <Key className="absolute left-3 top-3 text-orange-400" />
+                <Key className="absolute left-3 top-3 text-orange-400" size={20} />
                 <input
                   type="text"
                   name="adminCode"
@@ -132,11 +146,12 @@ export default function Register() {
                   value={form.adminCode}
                   onChange={handleChange}
                   className="w-full pl-10 pr-3 py-3 rounded-lg bg-black/40 text-white placeholder-gray-400 border border-gray-600 focus:border-orange-400 focus:ring-2 focus:ring-orange-500 outline-none transition"
-                  required={form.role === "admin"}
+                  required
                 />
               </div>
             )}
 
+            {/* submit */}
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0px 0px 20px #f97316" }}
               whileTap={{ scale: 0.95 }}

@@ -71,4 +71,32 @@ router.put("/:id/status", protect, admin, async (req, res) => {
   }
 });
 
+// ✅ PUT /api/bookings/:id/cancel → Cancel a booking (Customer)
+router.put("/:id/cancel", protect, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    // Make sure the logged-in user owns this booking
+    if (booking.customer.toString() !== req.user.id) {
+      return res.status(403).json({ message: "You can only cancel your own bookings" });
+    }
+
+    // Only pending bookings can be cancelled
+    if (booking.status !== "Pending") {
+      return res.status(400).json({ message: "Only pending bookings can be cancelled" });
+    }
+
+    booking.status = "Cancelled";
+    await booking.save();
+
+    res.json({ message: "Booking cancelled successfully", booking });
+  } catch (error) {
+    console.error("Cancel booking error:", error);
+    res.status(500).json({ message: "Failed to cancel booking" });
+  }
+});
+
+
 export default router;
