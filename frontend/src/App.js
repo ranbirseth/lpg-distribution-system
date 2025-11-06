@@ -6,7 +6,7 @@ import Register from "./pages/Register";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
-
+import AdminOrders from "./pages/AdminOrders";
 function App() {
   return (
     <AuthProvider>
@@ -27,6 +27,15 @@ function App() {
             element={
               <ProtectedRoute role="admin">
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/orders"
+            element={
+              <ProtectedRoute role="admin">
+                 <AdminOrders />
               </ProtectedRoute>
             }
           />

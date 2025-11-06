@@ -2,6 +2,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+// ✅ Verify user token and attach user ID to request
 export const protect = async (req, res, next) => {
   let token;
 
@@ -10,12 +11,13 @@ export const protect = async (req, res, next) => {
     token = authHeader.split(" ")[1];
   }
 
-  if (!token) return res.status(401).json({ message: "Not authorized, token missing" });
+  if (!token) {
+    return res.status(401).json({ message: "Not authorized, token missing" });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // put minimal user info on req
-    req.user = { id: decoded.id };
+    req.user = { id: decoded.id }; // store user id
     next();
   } catch (err) {
     console.error("Auth error:", err);
@@ -23,15 +25,23 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// optionally role guard
+// ✅ Allow access only if logged-in user is admin
 export const admin = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id);
-    if (user && user.role === "admin") {
-      next();
-    } else {
-      res.status(403).json({ message: "Require admin role" });
+    if (!req.user?.id) {
+      return res.status(401).json({ message: "Not authorized, no user found" });
     }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role !== "admin") {
+      return res.status(403).json({ message: "Require admin role" });
+    }
+
+    next();
   } catch (err) {
     console.error("Admin middleware error:", err);
     res.status(500).json({ message: "Server error" });
