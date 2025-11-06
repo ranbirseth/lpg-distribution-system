@@ -2,7 +2,7 @@
 import { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, Key } from "lucide-react";
 import API from "../services/api";
 import { AuthContext } from "../context/AuthContext";
 
@@ -15,11 +15,11 @@ export default function Register() {
     email: "",
     password: "",
     role: "customer",
+    adminCode: "", // 🧠 for secret code
   });
 
   const [error, setError] = useState("");
 
-  // ✅ handleChange for all inputs
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -28,12 +28,15 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
+    // 🧩 Prevent empty adminCode if role = admin
+    if (form.role === "admin" && !form.adminCode) {
+      return setError("Admin secret code is required.");
+    }
+
     try {
       const { data } = await API.post("/auth/register", form);
 
-      login(data); // save user + token
-
-      // Determine role correctly
+      login(data);
       const userRole = data.role || data.user?.role;
 
       if (userRole === "admin") navigate("/admin");
@@ -100,6 +103,7 @@ export default function Register() {
               />
             </div>
 
+            {/* 🧠 Role dropdown */}
             <div className="relative">
               <User className="absolute left-3 top-3 text-orange-400" />
               <select
@@ -116,6 +120,22 @@ export default function Register() {
                 </option>
               </select>
             </div>
+
+            {/* 🧩 Show secret code field only when role=admin */}
+            {form.role === "admin" && (
+              <div className="relative">
+                <Key className="absolute left-3 top-3 text-orange-400" />
+                <input
+                  type="text"
+                  name="adminCode"
+                  placeholder="Enter Admin Secret Code"
+                  value={form.adminCode}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-3 rounded-lg bg-black/40 text-white placeholder-gray-400 border border-gray-600 focus:border-orange-400 focus:ring-2 focus:ring-orange-500 outline-none transition"
+                  required={form.role === "admin"}
+                />
+              </div>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: "0px 0px 20px #f97316" }}

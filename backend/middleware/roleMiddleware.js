@@ -1,3 +1,4 @@
+// backend/middleware/roleMiddleware.js
 import User from "../models/User.js";
 
 export const admin = async (req, res, next) => {

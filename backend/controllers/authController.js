@@ -21,6 +21,15 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Email already registered." });
     }
 
+    // ✅ Restrict admin registration
+    if (role === "admin") {
+      if (
+        email !== process.env.ADMIN_EMAIL ||
+        adminCode !== process.env.ADMIN_SECRET
+      ) {
+        return res.status(403).json({ message: "Invalid admin credentials." });
+      }
+    }
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(password, salt);

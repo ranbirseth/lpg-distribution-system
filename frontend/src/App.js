@@ -7,6 +7,8 @@ import CustomerDashboard from "./pages/CustomerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminOrders from "./pages/AdminOrders";
+import CustomerProfile from "./pages/CustomerProfile";
+import AdminUsers from "./pages/AdminUsers";
 function App() {
   return (
     <AuthProvider>
@@ -30,12 +32,27 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute role="customer">
+                <CustomerProfile />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin/orders"
             element={
               <ProtectedRoute role="admin">
-                 <AdminOrders />
+                <AdminOrders />
+              </ProtectedRoute>
+            }
+          />
+                    <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminUsers />
               </ProtectedRoute>
             }
           />

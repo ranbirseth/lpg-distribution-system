@@ -1,3 +1,4 @@
+// backend/controllers/bookingController.js
 import Booking from "../models/Booking.js";
 
 // @desc Create new booking
